@@ -10,7 +10,9 @@ from util import encode_key
 
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
+
 
 class Signer(object):
     def __init__(
@@ -23,7 +25,6 @@ class Signer(object):
 
     def sign_request(self, req: Request) -> PreparedRequest:
         d = datetime.utcnow()
-        # datetime.now(datetime.UTC)
         epoch = datetime(1970, 1, 1)
         timestamp = math.trunc((d - epoch).total_seconds() * 1_000)
 
@@ -43,12 +44,14 @@ class Signer(object):
         req.headers = {
             "orderly-timestamp": str(timestamp),
             "orderly-account-id": self._account_id,
-            "orderly-key": os.getenv("ORDERLY_KEY_TESTNET"), # Changed this line to hard code the key.  The function that was there before doesn't exist.
+            "orderly-key": os.getenv(
+                "ORDERLY_KEY_TESTNET"
+            ),  # Changed this line to hard code the key.  The function that was there before doesn't exist.
             "orderly-signature": orderly_signature,
         }
-        if req.method == "GET":
+        if req.method == "GET" or req.method == "DELETE":
             req.headers["Content-Type"] = "application/x-www-form-urlencoded"
-        elif req.method == "POST":
+        elif req.method == "POST" or req.method == "PUT":
             req.headers["Content-Type"] = "application/json"
 
         return req.prepare()
