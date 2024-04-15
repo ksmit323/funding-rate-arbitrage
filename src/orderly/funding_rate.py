@@ -48,8 +48,3 @@ class FundingRate(object):
                 highest_rate = (symbol, rate)
 
         return highest_rate
-
-
-
-# fr = FundingRate()
-# print(fr.get_highest_funding_rate())
