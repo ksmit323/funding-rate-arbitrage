@@ -1,8 +1,3 @@
-from eth_account import Account
-import json
-from requests import Request, Session
-from config import Config
-from signer import Signer
 import requests
 
 
@@ -48,3 +43,7 @@ class FundingRate(object):
                 highest_rate = (symbol, rate)
 
         return highest_rate
+
+
+fr = FundingRate()
+print(fr.get_all_funding_rates())
