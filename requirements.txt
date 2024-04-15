@@ -1,0 +1,5 @@
+eth-account
+web3
+cryptography
+base58
+python-dotenv
