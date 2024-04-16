@@ -1,11 +1,5 @@
 import sys
-sys.path.append("src")
-sys.path.append("src/orderly")
-sys.path.append("src/hyperliq")
-sys.path.append("src/strategies")
 
-from hyperliq.funding_rate import HyperliquidFundingRates
-from orderly.funding_rate import OrderlyFundingRates
 import pandas as pd
 import numpy as np
 from tabulate import tabulate
@@ -36,30 +30,43 @@ class PerpToPerpArbitrage(object):
 
         return all_rates
 
-    
+    def create_rates_table(self, compiled_rates):
 
-df = pd.DataFrame(data).T
-# Fill NaN values with a placeholder if any, such as 0 or 'n/a'
-df.fillna(np.nan, inplace=True)
-# Sort the DataFrame by index (symbol names) alphabetically
-df.sort_index(inplace=True)
-# Calculate the absolute difference
-df["Difference"] = (df["Orderly"] - df["Hyperlink"]).abs()
+        df = pd.DataFrame(compiled_rates).T
 
-# Print with tabulate for better formatting
-print(tabulate(df, headers="keys", tablefmt="psql"))
+        # Fill NaN values with a nan
+        df.fillna(np.nan, inplace=True)
 
-# # Find the index of the max difference
-# max_diff_index = df["Difference"].idxmax()
+        # Sort the DataFrame by index (symbol names) alphabetically
+        df.sort_index(inplace=True)
 
-# # Print the row with the maximum difference
-# max_diff_row = df.loc[max_diff_index]
-# print(f"Row with the largest difference: \n{max_diff_row}")
+        return df
 
-# Get the top three rows with the largest differences
-top_three_diff = df.nlargest(3, "Difference")
-print("Top three rows with the largest differences:")
-print(tabulate(top_three_diff, headers="keys", tablefmt="psql"))
+    def display_rates_table(self, df):
+        print(tabulate(df, headers="keys", tablefmt="psql"))
+
+    def display_top_rates_difference(self, df):
+
+        # Calculate max/min while ignoring NaN
+        df["MaxRate"] = df.max(axis=1, skipna=True)
+        df["MinRate"] = df.min(axis=1, skipna=True)
+        df["Difference"] = (df["MaxRate"] - df["MinRate"]).abs()
+
+        # Get the top three rows with the largest differences
+        top_three_diff = df.nlargest(3, "Difference")
+
+        print("Top three rows with the largest differences:")
+        print(tabulate(top_three_diff, headers="keys", tablefmt="psql"))
+
+
+
+
+
+
+
+
+
+
 
 
 # # Usage
