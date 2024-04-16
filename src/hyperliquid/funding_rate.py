@@ -3,7 +3,7 @@ import utils
 import time
 
 
-class FundingRate(object):
+class HyperliquidFundingRates(object):
     def __init__(self):
         self.address, self.info, self.exchange = utils.setup(
             constants.TESTNET_API_URL, skip_ws=True
@@ -12,9 +12,9 @@ class FundingRate(object):
     def get_funding_history(self, symbol: str) -> int:
 
         # Current timestamp minus 30 mins to get the most recent fr
-        timestamp = int(time.time() * 1000) - 1800 * 1000
+        start_time = int(time.time() * 1000) - 1800 * 1000
 
-        return self.info.funding_history(symbol, timestamp)
+        return self.info.funding_history(symbol, start_time)
 
     def get_hyperliquid_funding_rates(self):
         """
@@ -31,19 +31,19 @@ class FundingRate(object):
         asset_info = meta_data[0]["universe"]
         asset_context = meta_data[1]
 
-        # Initialize list to hold assets, funding rates
-        assets_and_funding_rates = []
+        # Initialize dict to hold assets, funding rates
+        assets_to_funding_rates = {}
 
         # Iterating over both lists, assuming they are aligned by index
         for asset, context in zip(asset_info, asset_context):
-            name = asset["name"]
+            symbol = asset["name"]
             funding_rate = float(context["funding"]) * 8 # convert to 8hr rate from 1hr rate
-            assets_and_funding_rates.append((name, funding_rate))
+            assets_to_funding_rates[symbol] = funding_rate
 
-        return assets_and_funding_rates
+        return assets_to_funding_rates
 
 
-fr = FundingRate()
+fr = HyperliquidFundingRates()
 
 # fr.get_funding_history()
 print(fr.get_hyperliquid_funding_rates())
