@@ -1,7 +1,7 @@
 import requests
 
 
-class FundingRate(object):
+class OrderlyFundingRates(object):
     def __init__(self):
         self.url = "https://testnet-api-evm.orderly.network/v1/public"
 
@@ -16,20 +16,21 @@ class FundingRate(object):
 
         return data["data"]
 
-    def get_all_funding_rates(self) -> list:
+    def get_orderly_funding_rates(self) -> dict:
         # Minimum 24-hour volume threshold
         MIN_VOLUME = 100000
 
         url = self.url + "/futures"
         data = self._get_data(url)
 
-        # Initialize list
-        filtered_data = []
+        # Initialize dict
+        filtered_data = {}
 
         # Check each entry for sufficient volume
         for entry in data["data"]["rows"]:
             if entry["24h_volume"] >= MIN_VOLUME:
-                filtered_data.append((entry["symbol"], entry["est_funding_rate"]))
+                symbol = entry["symbol"].replace("PERP_", "").replace("_USDC", "") # Extract out just the ticker
+                filtered_data[symbol] = entry["est_funding_rate"]
 
         return filtered_data
 
@@ -45,5 +46,6 @@ class FundingRate(object):
         return highest_rate
 
 
-fr = FundingRate()
-print(fr.get_all_funding_rates())
+# fr = FundingRate()
+# print(fr.get_orderly_funding_rates())
+
