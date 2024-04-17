@@ -104,29 +104,15 @@ def orderly_get_orders():
     print(client.order.get_orders())
 
 
-def orderly_create_order(
-    symbol: str,
-    order_type: OrderType,
-    order_quantity: float,
-    side: Side,
-):
-    res = client.order.create_order(symbol, order_type, order_quantity, side)
-    print("create_order:", res)
-
-    return res
-
-
 def orderly_cancel_all_orders():
     res = client.order.cancel_all_orders()
     print("Cancelled Orders: ", res)
-
     return res
 
 
 def orderly_settle_pnl():
     res = client.pnl.settle_pnl()
     print("settle_pnl:", res)
-
     return res
 
 
@@ -149,6 +135,24 @@ def analyze_perp_perp_arbitrage(option: int):
         perpArb.display_top_rates_difference(df)
 
 
+def create_order(dex, symbol, quantity, side):
+    """Generic function to create an order on a DEX."""
+
+    if dex == "orderly":
+        orderly_symbol = f"PERP_{symbol}_USDC"
+        response = client.order.create_order(
+            orderly_symbol, OrderType.MARKET, quantity, side
+        )
+        print("\nOrderly Order:", response, "\n")
+        return response["success"] == True
+
+    elif dex == "hyperliquid":
+        response = hyperliquid_order.create_market_order(symbol, quantity, side)
+        return response == "ok"
+
+    #* elif add additional DEXs here
+
+
 def execute_perp_perp_arbitrage(
     symbol: str, short_on_dex: str, long_on_dex: str, order_quantity: float
 ):
@@ -156,39 +160,17 @@ def execute_perp_perp_arbitrage(
     Short asset on DEX with the higher funding rate,
     long asset on DEX with the lower funding rate
     """
-    orderly_symbol = "PERP_" + symbol + "_USDC"
+    # Execute short order
+    if not create_order(short_on_dex, symbol, order_quantity, Side.SELL):
+        print(f"{short_on_dex.title()} order failed, abort strategy")
+        return
 
-    # Create short order on DEX
-    if short_on_dex == "orderly":
-        res = orderly_create_order(
-            orderly_symbol, OrderType.MARKET, order_quantity, Side.SELL
-        )
-        if res["success"] != True:
-            return print("Orderly order failed")
-
-    elif short_on_dex == "hyperlink":
-        order_status = hyperliquid_order.create_market_order(
-            symbol, order_quantity, Side.SELL
-        )
-        if order_status != "ok":
-            # TODO: Close Orderly position
-            return print("Hyperliquid order failed, abort strategy")
-
-    # Create long order on DEX
-    if long_on_dex == "orderly":
-        res = orderly_create_order(
-            orderly_symbol, OrderType.MARKET, order_quantity, Side.BUY
-        )
-        if res["success"] != True:
-            return print("Orderly order failed")
-        
-    elif long_on_dex == "hyperliquid":
-        order_status = hyperliquid_order.create_market_order(
-            symbol, order_quantity, Side.BUY
-        )
-        if order_status != "ok":
-            # TODO: Close Orderly position
-            return print("Hyperliquid order failed, abort strategy")
+    # Execute long order
+    if not create_order(long_on_dex, symbol, order_quantity, Side.BUY):
+        print(f"{long_on_dex.title()} order failed, abort strategy")
+        print("Close the short position!")
+        # TODO: Consider adding logic to close the initial short order if needed
+        return
 
 
 def analyze_perp_spot_arbitrage(): ...
@@ -221,4 +203,6 @@ if __name__ == "__main__":
     # Initiate Hyperliquid Order object
     hyperliquid_order = HyperLiquidOrder()
 
-    main_menu()
+    #* Initiate new DEX here!
+
+    execute_perp_perp_arbitrage("ORDI", "orderly", "hyperliquid", 1)
