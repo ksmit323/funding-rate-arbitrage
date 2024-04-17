@@ -30,7 +30,7 @@ class HyperLiquidOrder(object):
                 try:
                     filled = status["filled"]
                     print(
-                        f'Order #{filled["oid"]} filled {filled["totalSz"]} @{filled["avgPx"]}'
+                        f'Hyperliquid Order: #{filled["oid"]} filled {filled["totalSz"]} @{filled["avgPx"]}'
                     )
                 except KeyError:
                     print(f'Error: {status["error"]}')
@@ -57,7 +57,7 @@ class HyperLiquidOrder(object):
                 try:
                     filled = status["filled"]
                     print(
-                        f'Order #{filled["oid"]} filled {filled["totalSz"]} @{filled["avgPx"]}'
+                        f'Hyperliquid Order #{filled["oid"]} filled {filled["totalSz"]} @{filled["avgPx"]}'
                     )
                 except KeyError:
                     print(f'Error: {status["error"]}')
@@ -69,9 +69,8 @@ class HyperLiquidOrder(object):
             self.exchange.cancel(open_order["coin"], open_order["oid"])
 
 
-# order = Order()
-
-# order.create_market_order("ETH/USDC", 0.01, Side.BUY)
+# order = HyperLiquidOrder()
+# order.create_market_order("ETH", 0.01, Side.BUY)
 # order.market_close_one_asset("ETH")
 # order.create_limit_order("PURR/USDC", 0.01, Side.BUY, 1000)
 # order.cancel_open_orders()

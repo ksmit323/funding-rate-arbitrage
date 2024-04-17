@@ -94,15 +94,15 @@ class PerpToPerpArbitrage(object):
 
 
 # # Usage
-orderly_rates = OrderlyFundingRates().get_orderly_funding_rates()
-hyperliquid_rates = HyperliquidFundingRates().get_hyperliquid_funding_rates()
+# orderly_rates = OrderlyFundingRates().get_orderly_funding_rates()
+# hyperliquid_rates = HyperliquidFundingRates().get_hyperliquid_funding_rates()
 
-perpArb = PerpToPerpArbitrage()
+# perpArb = PerpToPerpArbitrage()
 
-perpArb.add_dex_rates("Orderly", orderly_rates)
-perpArb.add_dex_rates("Hyperlink", hyperliquid_rates)
+# perpArb.add_dex_rates("Orderly", orderly_rates)
+# perpArb.add_dex_rates("Hyperlink", hyperliquid_rates)
 
-compiled_rates = perpArb.compile_rates()
-df = perpArb.create_rates_table(compiled_rates)
+# compiled_rates = perpArb.compile_rates()
+# df = perpArb.create_rates_table(compiled_rates)
 
-perpArb.display_top_rates_differences_from_Orderly(df)
+# perpArb.display_top_rates_differences_from_Orderly(df)
