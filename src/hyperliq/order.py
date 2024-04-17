@@ -8,7 +8,7 @@ class Side(StrEnum):
     SELL = "SELL"
 
 
-class Order(object):
+class HyperLiquidOrder(object):
     def __init__(self):
         self.address, self.info, self.exchange = utils.setup(
             constants.TESTNET_API_URL, skip_ws=True
@@ -34,6 +34,10 @@ class Order(object):
                     )
                 except KeyError:
                     print(f'Error: {status["error"]}')
+                    return order_result["status"]
+                
+        return order_result["status"]
+                
 
     def create_limit_order(
         self, symbol: str, order_quantity: float, side: Side, limit_price: float
