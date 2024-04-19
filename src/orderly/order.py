@@ -40,25 +40,37 @@ class Order(object):
         request = Request("GET", "%s/v1/orders" % self._config.base_url)
         return self._send_request(request)
 
-    def create_order(
+    def create_market_order(
         self,
         symbol: str,
-        order_type: OrderType,
         order_quantity: float,
         side: Side,
     ):
+        symbol = f"PERP_{symbol}_USDC"
+
         # TODO: Need to add more to the JSON for limit orders
         request = Request(
             "POST",
             "%s/v1/order" % self._config.base_url,
             json={
                 "symbol": symbol,
-                "order_type": str(order_type),
+                "order_type": str(OrderType.MARKET),
                 "order_quantity": order_quantity,
                 "side": str(side),
             },
         )
         return self._send_request(request)
+
+    # TODO: Create limit order
+    def create_limit_order(
+        self,
+        symbol: str,
+        order_quantity: float,
+        side: Side,
+    ): ...
+
+    # TODO: Market close an asset
+    def market_close_an_asset(self, symbol): ...
 
     def cancel_all_orders(self):
         request = Request(
