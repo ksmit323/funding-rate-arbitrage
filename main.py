@@ -4,6 +4,7 @@ import sys
 sys.path.append("src")
 sys.path.append("src/orderly")
 sys.path.append("src/hyperliq")
+sys.path.append("src/apex")
 
 from eth_account import Account
 from hyperliq.funding_rate import HyperliquidFundingRates
@@ -12,6 +13,8 @@ from orderly.funding_rate import OrderlyFundingRates
 from orderly.client import Client
 from orderly.config import Config
 from orderly.order import OrderType, Side
+from apex.funding_rate import ApexProFundingRates
+from apex.order import ApexProOrder
 from strategies.funding_rate_arbitrage import FundingRateArbitrage
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from base58 import b58decode
@@ -75,9 +78,7 @@ def create_order(dex, symbol, quantity, side):
     """Helper function to create an order on any DEX."""
 
     if dex == "orderly":
-        response = client.order.create_market_order(
-            symbol, quantity, side
-        )
+        response = client.order.create_market_order(symbol, quantity, side)
         print("\nOrderly Order:", response, "\n")
         return response["success"] == True
 
@@ -85,7 +86,11 @@ def create_order(dex, symbol, quantity, side):
         response = hyperliquid_order.create_market_order(symbol, quantity, side)
         return response == "ok"
 
-    #* elif ADD DEX HERE
+    elif dex == "apexpro":
+        response = apexpro_order.create_market_order(symbol, quantity, side)
+        return response["data"]["status"] == "PENDING"
+
+    # * elif ADD DEX HERE
 
 
 def execute_funding_rate_arbitrage(
@@ -103,7 +108,7 @@ def execute_funding_rate_arbitrage(
     # Execute long order
     if not create_order(long_on_dex, symbol, order_quantity, Side.BUY):
         print(f"{long_on_dex.title()} order failed, abort strategy")
-        print("Close the short position!")
+        print("Closing the short position!")
         # TODO: Consider adding logic to close the initial short order if needed
         return
 
@@ -117,6 +122,7 @@ if __name__ == "__main__":
     DEX_rates_list = [
         ("orderly", OrderlyFundingRates().get_orderly_funding_rates()),
         ("hyperliquid", HyperliquidFundingRates().get_hyperliquid_funding_rates()),
+        ("apexpro", ApexProFundingRates().get_apexpro_funding_rates()),
     ]
 
     # Set Orderly Client
@@ -131,6 +137,7 @@ if __name__ == "__main__":
 
     # Initiate Hyperliquid Order object
     hyperliquid_order = HyperLiquidOrder()
+    apexpro_order = ApexProOrder()
     # *** ADD DEX HERE ***
 
     while True:
@@ -199,4 +206,4 @@ if __name__ == "__main__":
             print("Exiting program, have a good day 😊")
             break
         else:
-            print("Invalid choice, please try again")
+            print("\nInvalid choice, please try again")

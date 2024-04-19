@@ -34,7 +34,7 @@ class ApexProFundingRates(object):
             if "USDT" in entry["s"]:
                 continue
             else:
-                symbol = entry["s"].replace("USDC", "-USDC")
+                symbol = entry["s"].replace("USDC", "")
                 funding_rates[symbol] = float(entry["fr"]) * 8 # Convert to 8hr funding rate
 
         return funding_rates

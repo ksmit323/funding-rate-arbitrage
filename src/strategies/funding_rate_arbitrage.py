@@ -57,11 +57,11 @@ class FundingRateArbitrage(object):
 
         def max_diff_and_dex(row):
             """Function to calculate the maximum difference from Orderly and identify the DEX"""
-            orderly_rate = row["Orderly"]
+            orderly_rate = row["orderly"]
             max_diff = 0
             max_dex = None
             for dex, rate in row.items():
-                if dex != "Orderly":
+                if dex != "orderly":
                     diff = abs(orderly_rate - rate)
                     if diff > max_diff:
                         max_diff = diff

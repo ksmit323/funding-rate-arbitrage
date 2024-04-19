@@ -11,7 +11,8 @@ from apexpro.constants import (
     APEX_HTTP_TEST,
     NETWORKID_TEST,
 )
-from utils import get_apexpro_naming_convention
+from src.apex.utils import get_apexpro_naming_convention
+
 
 # Paths required by ApexPro API
 root_path = os.path.abspath(__file__)
