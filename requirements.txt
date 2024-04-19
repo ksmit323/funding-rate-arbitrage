@@ -3,3 +3,6 @@ web3
 cryptography
 base58
 python-dotenv
+apexpro
+pandas
+numpy
