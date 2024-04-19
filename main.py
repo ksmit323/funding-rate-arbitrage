@@ -6,6 +6,7 @@ sys.path.append("src/orderly")
 sys.path.append("src/hyperliq")
 sys.path.append("src/apex")
 
+import time
 from eth_account import Account
 from hyperliq.funding_rate import HyperliquidFundingRates
 from hyperliq.order import HyperLiquidOrder
@@ -20,6 +21,10 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from base58 import b58decode
 from dotenv import load_dotenv
 
+from pyfiglet import Figlet
+from prompt_toolkit import print_formatted_text, HTML
+
+
 load_dotenv()
 
 
@@ -31,6 +36,11 @@ def prompt_user(options, prompt):
     choice = int(input("Enter your choice: "))
 
     return choice
+
+
+def clear_screen():
+    """Helper function for CLI"""
+    os.system("cls" if os.name == "nt" else "clear")
 
 
 def orderly_get_holdings():
@@ -79,16 +89,24 @@ def create_order(dex, symbol, quantity, side):
 
     if dex == "orderly":
         response = client.order.create_market_order(symbol, quantity, side)
-        print("\nOrderly Order:", response, "\n")
-        return response["success"] == True
+        success = response["success"] == True
+        if success:
+            print("Orderly order was successful")
+        return success
 
     elif dex == "hyperliquid":
         response = hyperliquid_order.create_market_order(symbol, quantity, side)
-        return response == "ok"
+        success = response == "ok"
+        if success:
+            print("Hyperliquid order was succesful")
+        return success
 
     elif dex == "apexpro":
         response = apexpro_order.create_market_order(symbol, quantity, side)
-        return response["data"]["status"] == "PENDING"
+        success = response["data"]["status"] == "PENDING"
+        if success:
+            print("ApexPro order was successful")
+        return success
 
     # * elif ADD DEX HERE
 
@@ -102,15 +120,17 @@ def execute_funding_rate_arbitrage(
     """
     # Execute short order
     if not create_order(short_on_dex, symbol, order_quantity, Side.SELL):
-        print(f"{short_on_dex.title()} order failed, abort strategy")
-        return
+        print(f"{short_on_dex.title()} order failed, aborting strategy")
+        return False
 
     # Execute long order
     if not create_order(long_on_dex, symbol, order_quantity, Side.BUY):
-        print(f"{long_on_dex.title()} order failed, abort strategy")
+        print(f"{long_on_dex.title()} order failed, aborting strategy")
         print("Closing the short position!")
         # TODO: Consider adding logic to close the initial short order if needed
-        return
+        return False
+
+    return True
 
 
 # TODO: Add positons (view, close), add orders, add PnL, add margin, add PTSL
@@ -140,24 +160,26 @@ if __name__ == "__main__":
     apexpro_order = ApexProOrder()
     # *** ADD DEX HERE ***
 
+    figlet = Figlet()
+    figlet.setFont(font="speed")
+
     while True:
+        clear_screen()
+        print(figlet.renderText("Funding Rate Arbitrage"))
         options = [
             "View open positions",  # 1
             "Close positions",  # 2
             "Cancel Open orders",  # 3
             "View PnL",  # 4
-            "Settle Orderly PnL",  # 5
-            "Analyze Perp-Perp Arbitrage Strategy",  # 6
-            "Analyze Perp-Spot Arbitrage Strategy",  # 7
-            "Execute Perp-Perp Arbitrage Strategy",  # 8
-            "Execute Perp-Spot Arbitrage Strategy",  # 9
-            "Exit",
+            "Start Funding Rate Strategy",  # 5
+            "Exit",  # 6
         ]
         choice = prompt_user(options, "\nWhat would you like to do?")
 
         if choice == 1:
             ...
             options = ["Back to Main Menu"]
+
         elif choice == 2:
             ...
             options = ["Back to Main Menu"]
@@ -170,40 +192,92 @@ if __name__ == "__main__":
             ...
             options = ["Back to Main Menu"]
 
-        elif choice == 5:
-            options = ["Back to Main Menu"]
             ...
-        elif choice == 6:
+        elif choice == 5:
             while True:
                 options = [
                     "View rates on all available DEXs",
                     "View top 3 rate differences from Orderly",
                     "View top 3 rate differences from all DEXs",
+                    "Execute Strategy",
                     "Back to Main Menu",
                 ]
                 choice = prompt_user(options, "\nWhat would you like to do?")
-                if choice >= 1 and choice <= 3:
-                    analyze_funding_rate_arbitrage(choice)
+                if choice == 1:
+                    clear_screen()
+                    analyze_funding_rate_arbitrage(1)
                 elif choice == 2:
+                    clear_screen()
                     analyze_funding_rate_arbitrage(2)
                 elif choice == 3:
+                    clear_screen()
                     analyze_funding_rate_arbitrage(3)
                 elif choice == 4:
+                    print(
+                        "\nWhen entering a symbol, just enter the symbol itself i.e. ETH\n"
+                    )
+                    symbol = input("Symbol to trade: ").upper()
+                    dex_options = [
+                        "orderly",
+                        "hyperliquid",
+                        "apexpro",
+                    ]  # * Add any new DEXs to this list
+
+                    # Prompt user to pick DEX to short on
+                    choice = prompt_user(dex_options, "\nShort on what DEX?")
+                    try:
+                        short_on_dex = dex_options[choice - 1]
+                    except IndexError:
+                        print("Invalid choice, aborting!")
+
+                    # Remove DEX from list of choices
+                    del dex_options[choice - 1]
+
+                    # Prompt user to pick DEX to long on
+                    choice = prompt_user(dex_options, "\nLong on what DEX?")
+                    try:
+                        long_on_dex = dex_options[choice - 1]
+                    except IndexError:
+                        print("Invalid choice, aborting!")
+
+                    # Prompt user for order quantity
+                    order_quantity = float(input("\nEnter Order Quantity: "))
+
+                    # Verify user's choices
+                    print("\nYou chose to:")
+                    print_formatted_text("Short on DEX: ", HTML(f"<ansired>{short_on_dex}</ansired>"))
+                    print_formatted_text("Long on DEX: ", HTML(f"<ansigreen>{long_on_dex}</ansigreen>"))
+                    print("Order Quantity: ", order_quantity)
+                    options = ["Yes", "No"]
+                    choice = prompt_user(options, "Are you sure this is correct?")
+                    if choice == 1:
+                        print("Okay! Let's Arbitrage!")
+                    elif choice == 2:
+                        print("Aborting!")
+                        time.sleep(2)
+                        break
+                    else:
+                        print("Invalid choice, aborting!")
+                        time.sleep(2)
+                        break
+
+                    if execute_funding_rate_arbitrage(
+                        symbol, short_on_dex, long_on_dex, order_quantity
+                    ):
+                        print(
+                            "\nCongrats! You have succesfully performed the Funding Rate Arbitrage!"
+                        )
+
+                elif choice == 5:
+                    clear_screen()
                     break
                 else:
                     print("\nInvalid choice, please try again!")
-        elif choice == 7:
-            options = ["Back to Main Menu"]
-            ...
-        elif choice == 8:
-            # Put a note to the user to only put in the ticker symbol i.e. ETH
-            options = ["Back to Main Menu"]
-            ...
-        elif choice == 9:
-            options = ["Back to Main Menu"]
-            ...
-        elif choice == 10:
-            print("Exiting program, have a good day 😊")
+                    time.sleep(1.5)
+  
+        elif choice == 5:
+            print("\nExiting program, have a good day 😊\n")
             break
         else:
             print("\nInvalid choice, please try again")
+            time.sleep(1.5)
