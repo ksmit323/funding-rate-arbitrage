@@ -17,7 +17,7 @@ class OrderlyFundingRates(object):
         return data["data"]
 
     def get_orderly_funding_rates(self) -> dict:
-        # Minimum 24-hour volume threshold
+        # Minimum 24-hour volume threshold in monetary value, not trades!
         MIN_VOLUME = 100000
 
         url = self.url + "/futures"
@@ -28,7 +28,7 @@ class OrderlyFundingRates(object):
 
         # Check each entry for sufficient volume
         for entry in data["data"]["rows"]:
-            if entry["24h_volume"] >= MIN_VOLUME:
+            if entry["24h_amount"] >= MIN_VOLUME:
                 symbol = entry["symbol"].replace("PERP_", "").replace("_USDC", "") # Extract out just the ticker
                 filtered_data[symbol] = entry["est_funding_rate"]
 
