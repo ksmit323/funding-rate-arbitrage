@@ -16,12 +16,12 @@ class HyperliquidFundingRates(object):
 
         return self.info.funding_history(symbol, start_time)
 
-    def get_hyperliquid_funding_rates(self):
+    def get_hyperliquid_funding_rates(self) -> dict:
         """
         Fetches asset names and their corresponding funding rates from the API.
 
         Returns:
-        list of tuples: A list containing tuples of (asset name, funding rate).
+        dict: a dictionary where the symbol is the key and the funding rate is the value
         """
 
         # Get meta data for all assets
@@ -41,9 +41,3 @@ class HyperliquidFundingRates(object):
             assets_to_funding_rates[symbol] = funding_rate
 
         return assets_to_funding_rates
-
-
-# fr = HyperliquidFundingRates()
-
-# # fr.get_funding_history()
-# print(fr.get_hyperliquid_funding_rates())

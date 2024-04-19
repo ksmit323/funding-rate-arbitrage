@@ -45,7 +45,3 @@ class OrderlyFundingRates(object):
 
         return highest_rate
 
-
-# fr = FundingRate()
-# print(fr.get_orderly_funding_rates())
-

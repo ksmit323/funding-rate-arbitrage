@@ -91,18 +91,3 @@ class FundingRateArbitrage(object):
 
         # print("\nTop three rows with the largest differences:")
         print(tabulate(top_three_diff, headers="keys", tablefmt="psql"))
-
-
-# # Usage
-# orderly_rates = OrderlyFundingRates().get_orderly_funding_rates()
-# hyperliquid_rates = HyperliquidFundingRates().get_hyperliquid_funding_rates()
-
-# perpArb = PerpToPerpArbitrage()
-
-# perpArb.add_dex_rates("Orderly", orderly_rates)
-# perpArb.add_dex_rates("Hyperlink", hyperliquid_rates)
-
-# compiled_rates = perpArb.compile_rates()
-# df = perpArb.create_rates_table(compiled_rates)
-
-# perpArb.display_top_rates_differences_from_Orderly(df)
