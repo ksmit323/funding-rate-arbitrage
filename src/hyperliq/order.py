@@ -29,9 +29,6 @@ class HyperLiquidOrder(object):
             for status in order_result["response"]["data"]["statuses"]:
                 try:
                     filled = status["filled"]
-                    print(
-                        f'Hyperliquid Order: #{filled["oid"]} filled {filled["totalSz"]} @{filled["avgPx"]}'
-                    )
                 except KeyError:
                     print(f'Error: {status["error"]}')
                     return order_result["status"]
