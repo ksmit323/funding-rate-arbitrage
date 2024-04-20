@@ -11,7 +11,7 @@ from apexpro.constants import (
     APEX_HTTP_TEST,
     NETWORKID_TEST,
 )
-from src.apex.utils import get_apexpro_naming_convention
+from apex_utils import get_apexpro_naming_convention
 
 
 # Paths required by ApexPro API
@@ -107,3 +107,26 @@ class ApexProOrder(object):
     def cancel_open_orders(self):
         print("Cancelling ApexPro open orders")
         return self.client.delete_open_orders()
+
+    def get_all_positions(self):
+        positions = self.account["data"]["positions"]
+
+        filtered_positions = []
+
+        for position in positions:
+            symbol = position["symbol"].replace("-USDC", "")
+            position_size = float(position["size"])
+            filtered_positions.append(
+                {"symbol": symbol, "position_size": position_size}
+            )
+
+        if len(filtered_positions) == 0:
+            return 0
+
+        return filtered_positions
+
+        #! NEED TO ADD SHORT OR LONG
+
+
+x = ApexProOrder()
+print(x.get_all_positions())
