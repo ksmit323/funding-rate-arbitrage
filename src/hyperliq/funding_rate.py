@@ -1,11 +1,11 @@
 from hyperliquid.utils import constants
-import utils
+import hyperliq.hyperliq_utils as hyperliq_utils
 import time
 
 
 class HyperliquidFundingRates(object):
     def __init__(self):
-        self.address, self.info, self.exchange = utils.setup(
+        self.address, self.info, self.exchange = hyperliq_utils.setup(
             constants.TESTNET_API_URL, skip_ws=True
         )
 
@@ -25,7 +25,7 @@ class HyperliquidFundingRates(object):
         """
 
         # Get meta data for all assets
-        meta_data = utils.get_meta_data()
+        meta_data = hyperliq_utils.get_meta_data()
 
         # Separate the meta data into asset info and it's asset context
         asset_info = meta_data[0]["universe"]
