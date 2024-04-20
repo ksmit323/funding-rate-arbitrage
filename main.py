@@ -5,25 +5,22 @@ sys.path.append("src")
 sys.path.append("src/orderly")
 sys.path.append("src/hyperliq")
 sys.path.append("src/apex")
-
 import time
 from eth_account import Account
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from base58 import b58decode
+from dotenv import load_dotenv
 from hyperliq.funding_rate import HyperliquidFundingRates
 from hyperliq.order import HyperLiquidOrder
 from orderly.funding_rate import OrderlyFundingRates
 from orderly.client import Client
 from orderly.config import Config
 from orderly.order import OrderType, Side
+from orderly.util import print_ascii_art
 from apex.funding_rate import ApexProFundingRates
 from apex.order import ApexProOrder
 from strategies.funding_rate_arbitrage import FundingRateArbitrage
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-from base58 import b58decode
-from dotenv import load_dotenv
-
-from pyfiglet import Figlet
 from prompt_toolkit import print_formatted_text, HTML
-
 
 load_dotenv()
 
@@ -84,6 +81,33 @@ def analyze_funding_rate_arbitrage(option: int):
         fr_arbitrage.display_top_rates_differences_from_all_DEXs(df)
 
 
+def market_close_an_asset(dex, symbol):
+    """Helper function to market close an asset on any DEX."""
+
+    if dex == "orderly":
+        response = client.order.market_close_an_asset(symbol)
+        success = response["success"] == True
+        if success:
+            print("Orderly order was successful")
+        return success
+
+    elif dex == "hyperliquid":
+        response = hyperliquid_order.market_close_an_asset(symbol)
+        success = response == "ok"
+        if success:
+            print("Hyperliquid order was successful")
+        return success
+
+    elif dex == "apexpro":
+        response = apexpro_order.market_close_an_asset(symbol)
+        success = response["data"]["status"] == "PENDING"
+        if success:
+            print("ApexPro order was successful")
+        return success
+
+    # * elif ADD NEW DEX HERE
+
+
 def create_order(dex, symbol, quantity, side):
     """Helper function to create an order on any DEX."""
 
@@ -98,7 +122,7 @@ def create_order(dex, symbol, quantity, side):
         response = hyperliquid_order.create_market_order(symbol, quantity, side)
         success = response == "ok"
         if success:
-            print("Hyperliquid order was succesful")
+            print("Hyperliquid order was successful")
         return success
 
     elif dex == "apexpro":
@@ -108,7 +132,7 @@ def create_order(dex, symbol, quantity, side):
             print("ApexPro order was successful")
         return success
 
-    # * elif ADD DEX HERE
+    # * elif ADD NEW DEX HERE
 
 
 def execute_funding_rate_arbitrage(
@@ -138,11 +162,18 @@ def execute_funding_rate_arbitrage(
 
 if __name__ == "__main__":
 
-    # *** ADD DEX HERE ***:
+    # *** ADD NEW DEX HERE ***:
     DEX_rates_list = [
         ("orderly", OrderlyFundingRates().get_orderly_funding_rates()),
         ("hyperliquid", HyperliquidFundingRates().get_hyperliquid_funding_rates()),
         ("apexpro", ApexProFundingRates().get_apexpro_funding_rates()),
+    ]
+
+    # *** ADD NEW DEX HERE ***:
+    dex_options = [
+        "orderly",
+        "hyperliquid",
+        "apexpro",
     ]
 
     # Set Orderly Client
@@ -155,17 +186,14 @@ if __name__ == "__main__":
     orderly_key = Ed25519PrivateKey.from_private_bytes(key)
     client.signer._key_pair = orderly_key
 
-    # Initiate Hyperliquid Order object
+    # Initiate DEX Order object
     hyperliquid_order = HyperLiquidOrder()
     apexpro_order = ApexProOrder()
-    # *** ADD DEX HERE ***
-
-    figlet = Figlet()
-    figlet.setFont(font="speed")
+    # *** ADD NEW DEX HERE ***
 
     while True:
         clear_screen()
-        print(figlet.renderText("Funding Rate Arbitrage"))
+        print_ascii_art()
         options = [
             "View open positions",  # 1
             "Close positions",  # 2
@@ -181,8 +209,39 @@ if __name__ == "__main__":
             options = ["Back to Main Menu"]
 
         elif choice == 2:
-            ...
-            options = ["Back to Main Menu"]
+
+            # Prompt user for DEX
+            choice = prompt_user(
+                dex_options, "\nWhat DEX would you like to close positions on?"
+            )
+            try:
+                close_on_dex = dex_options[choice - 1]
+            except IndexError:
+                print("Invalid choice, aborting!")
+
+            # Prompt user for symbol
+            print("\nWhen entering a symbol, just enter the symbol itself i.e. ETH\n")
+            symbol = input("Symbol to close: ").upper()
+
+            # Close position depending on DEX
+            success = market_close_an_asset(close_on_dex, symbol)
+            if success:
+                print_formatted_text(
+                    HTML(f"<ansigreen>{symbol}</ansigreen>"),
+                    "has been closed on",
+                    HTML(f"<ansigreen>{close_on_dex}</ansigreen>"),
+                )
+                options = ["Back to the Main Menu", "Exit Program"]
+                choice = prompt_user(options, "\nWhat would you like to do?")
+                if choice == 1:
+                    continue
+                else:
+                    print("\nExiting program, have a good day 😊\n")
+                    break
+
+            else:
+                print("Order has failed!")
+                time.sleep(2)
 
         elif choice == 3:
             ...
@@ -192,7 +251,6 @@ if __name__ == "__main__":
             ...
             options = ["Back to Main Menu"]
 
-            ...
         elif choice == 5:
             while True:
                 options = [
@@ -213,15 +271,12 @@ if __name__ == "__main__":
                     clear_screen()
                     analyze_funding_rate_arbitrage(3)
                 elif choice == 4:
+
+                    # Prompt user for symbol
                     print(
                         "\nWhen entering a symbol, just enter the symbol itself i.e. ETH\n"
                     )
                     symbol = input("Symbol to trade: ").upper()
-                    dex_options = [
-                        "orderly",
-                        "hyperliquid",
-                        "apexpro",
-                    ]  # * Add any new DEXs to this list
 
                     # Prompt user to pick DEX to short on
                     choice = prompt_user(dex_options, "\nShort on what DEX?")
@@ -245,8 +300,12 @@ if __name__ == "__main__":
 
                     # Verify user's choices
                     print("\nYou chose to:")
-                    print_formatted_text("Short on DEX: ", HTML(f"<ansired>{short_on_dex}</ansired>"))
-                    print_formatted_text("Long on DEX: ", HTML(f"<ansigreen>{long_on_dex}</ansigreen>"))
+                    print_formatted_text(
+                        "Short on DEX: ", HTML(f"<ansired>{short_on_dex}</ansired>")
+                    )
+                    print_formatted_text(
+                        "Long on DEX: ", HTML(f"<ansigreen>{long_on_dex}</ansigreen>")
+                    )
                     print("Order Quantity: ", order_quantity)
                     options = ["Yes", "No"]
                     choice = prompt_user(options, "Are you sure this is correct?")
@@ -269,13 +328,12 @@ if __name__ == "__main__":
                         )
 
                 elif choice == 5:
-                    clear_screen()
                     break
                 else:
                     print("\nInvalid choice, please try again!")
                     time.sleep(1.5)
-  
-        elif choice == 5:
+
+        elif choice == 6:
             print("\nExiting program, have a good day 😊\n")
             break
         else:
