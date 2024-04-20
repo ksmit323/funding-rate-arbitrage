@@ -10,7 +10,8 @@ from pnl import PnL
 from public import Public
 from register import Register
 from signer import Signer
-from position import Position
+# from position import Position
+
 
 class Client(object):
     def __init__(
@@ -28,14 +29,14 @@ class Client(object):
         self.account = Account(config, self._session, self.signer, account)
         self.order = Order(config, self._session, self.signer, account)
         self.pnl = PnL(config, self._session, self.signer, account)
-        self.position = Position(config, self._session, self.signer, account)
+        # self.position = Position(config, self._session, self.signer, account)
 
         res = requests.get(
             "%s/v1/get_account?address=%s&broker_id=%s"
             % (self._config.base_url, account.address, self._config.broker_id)
         )
         response = json.loads(res.text)
-        print("get_account reponse:", response)
+        # print("get_account reponse:", response)
 
         if response["success"]:
             self._account_id: str = response["data"]["account_id"]
