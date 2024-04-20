@@ -1,8 +1,10 @@
 from base58 import b58encode
+from prompt_toolkit import HTML, print_formatted_text
 import requests
 import json
 from eth_account import Account
 from config import Config
+from requests import Request
 
 
 def encode_key(key: bytes):
@@ -33,3 +35,21 @@ def get_faucet_USDC():
     print(res.text)
     response = json.loads(res.text)
     print("USDC Faucet:", response)
+
+def get_orderly_naming_convention(symbol):
+    return f"PERP_{symbol}_USDC"
+
+def print_ascii_art():
+    print_formatted_text(HTML("<ansigreen>███████╗██╗░░░██╗███╗░░██╗██████╗░██╗███╗░░██╗░██████╗░  ██████╗░░█████╗░████████╗███████╗</ansigreen>"))
+    print_formatted_text(HTML("<ansigreen>██╔════╝██║░░░██║████╗░██║██╔══██╗██║████╗░██║██╔════╝░  ██╔══██╗██╔══██╗╚══██╔══╝██╔════╝</ansigreen>"))
+    print_formatted_text(HTML("<ansigreen>█████╗░░██║░░░██║██╔██╗██║██║░░██║██║██╔██╗██║██║░░██╗░  ██████╔╝███████║░░░██║░░░█████╗░░</ansigreen>"))
+    print_formatted_text(HTML("<ansigreen>██╔══╝░░██║░░░██║██║╚████║██║░░██║██║██║╚████║██║░░╚██╗  ██╔══██╗██╔══██║░░░██║░░░██╔══╝░░</ansigreen>"))
+    print_formatted_text(HTML("<ansigreen>██║░░░░░╚██████╔╝██║░╚███║██████╔╝██║██║░╚███║╚██████╔╝  ██║░░██║██║░░██║░░░██║░░░███████╗</ansigreen>"))
+    print_formatted_text(HTML("<ansigreen>╚═╝░░░░░░╚═════╝░╚═╝░░╚══╝╚═════╝░╚═╝╚═╝░░╚══╝░╚═════╝░  ╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░╚══════╝</ansigreen>"))
+    print("\n")
+    print_formatted_text(HTML("<ansigreen>░█████╗░██████╗░██████╗░██╗████████╗██████╗░░█████╗░░██████╗░███████╗</ansigreen>"))
+    print_formatted_text(HTML("<ansigreen>██╔══██╗██╔══██╗██╔══██╗██║╚══██╔══╝██╔══██╗██╔══██╗██╔════╝░██╔════╝</ansigreen>"))
+    print_formatted_text(HTML("<ansigreen>███████║██████╔╝██████╦╝██║░░░██║░░░██████╔╝███████║██║░░██╗░█████╗░░</ansigreen>"))
+    print_formatted_text(HTML("<ansigreen>██╔══██║██╔══██╗██╔══██╗██║░░░██║░░░██╔══██╗██╔══██║██║░░╚██╗██╔══╝░░</ansigreen>"))
+    print_formatted_text(HTML("<ansigreen>██║░░██║██║░░██║██████╦╝██║░░░██║░░░██║░░██║██║░░██║╚██████╔╝███████╗</ansigreen>"))
+    print_formatted_text(HTML("<ansigreen>╚═╝░░╚═╝╚═╝░░╚═╝╚═════╝░╚═╝░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝░╚═════╝░╚══════╝</ansigreen>"))

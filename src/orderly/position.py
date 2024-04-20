@@ -4,6 +4,11 @@ from requests import Request, Session
 from config import Config
 from signer import Signer
 from order import Order
+from util import (
+    get_orderly_naming_convention,
+    get_position_request,
+    get_all_positions_request,
+)   
 
 
 class Position(object):
@@ -24,9 +29,3 @@ class Position(object):
 
     def get_all_positions(self):
         """Get all positions currently open"""
-
-    def close_one_position(self, symbol: str):
-        """Close a single position for a given asset"""
-
-    def close_all_positions(self):
-        """close all positions in the account"""
