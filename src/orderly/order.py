@@ -4,6 +4,7 @@ import json
 from requests import Request, Session
 from config import Config
 from signer import Signer
+from util import get_orderly_naming_convention
 
 
 class Side(StrEnum):
@@ -46,7 +47,7 @@ class Order(object):
         order_quantity: float,
         side: Side,
     ):
-        symbol = f"PERP_{symbol}_USDC"
+        symbol = get_orderly_naming_convention(symbol)
 
         # TODO: Need to add more to the JSON for limit orders
         request = Request(
@@ -70,7 +71,13 @@ class Order(object):
     ): ...
 
     # TODO: Market close an asset
-    def market_close_an_asset(self, symbol): ...
+    def market_close_an_asset(self, symbol):
+        order_quantity = float(self.get_position(symbol)["data"]["position_qty"])
+        side = Side.BUY if order_quantity < 0 else Side.SELL
+        if order_quantity != 0:
+            return self.create_market_order(symbol, order_quantity, side)
+        else:
+            print("No position held in this symbol")
 
     def cancel_all_orders(self):
         request = Request(
@@ -79,3 +86,37 @@ class Order(object):
             % self._config.base_url,  # Be careful, orders has to be plural here
         )
         return self._send_request(request)
+
+    def get_position(self, symbol):
+        symbol = get_orderly_naming_convention(symbol)
+        request = Request(
+            "GET", f"https://testnet-api-evm.orderly.network/v1/position/{symbol}"
+        )
+        return self._send_request(request)
+
+    def get_all_positions(self) -> list:
+        """
+        Get all Orderly open positions
+
+        returns: a list of dicts with symbols and position size
+        """
+
+        request = Request("GET", "https://testnet-api-evm.orderly.network/v1/positions")
+        positions_data = self._send_request(request)
+
+        filtered_positions = []
+
+        for position in positions_data["data"]["rows"]:
+            # Convert Ordelry naming convention to standard convention
+            symbol = position["symbol"].replace("PERP_", "").replace("_USDC", "")
+            position_size = position["position_qty"]
+            filtered_positions.append(
+                {"symbol": symbol, "position_size": position_size}
+            )
+
+        if len(filtered_positions) == 0:
+            return 0
+
+        return filtered_positions
+
+        #! NEED TO ADD SHORT OR LONG
