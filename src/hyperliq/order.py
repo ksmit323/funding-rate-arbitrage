@@ -1,6 +1,7 @@
 from enum import StrEnum
 from hyperliquid.utils import constants
-import utils
+import hyperliq_utils as hyperliq_utils
+import json
 
 
 class Side(StrEnum):
@@ -10,7 +11,7 @@ class Side(StrEnum):
 
 class HyperLiquidOrder(object):
     def __init__(self):
-        self.address, self.info, self.exchange = utils.setup(
+        self.address, self.info, self.exchange = hyperliq_utils.setup(
             constants.TESTNET_API_URL, skip_ws=True
         )
 
@@ -32,9 +33,8 @@ class HyperLiquidOrder(object):
                 except KeyError:
                     print(f'Error: {status["error"]}')
                     return order_result["status"]
-                
+
         return order_result["status"]
-                
 
     def create_limit_order(
         self, symbol: str, order_quantity: float, side: Side, limit_price: float
@@ -64,6 +64,29 @@ class HyperLiquidOrder(object):
         for open_order in open_orders:
             print(f"cancelling order {open_order}")
             self.exchange.cancel(open_order["coin"], open_order["oid"])
+
+    def get_all_positions(self):
+        """
+        Get all Hyperliquid open positions
+
+        returns: a list of dicts with symbols and position size
+        """
+        # Get the user state and print out position information
+        user_state = self.info.user_state(self.address)
+        filtered_positions = []
+        for position in user_state["assetPositions"]:
+            symbol = position["position"]["coin"]
+            position_size = float(position["position"]["szi"])
+            filtered_positions.append(
+                {"symbol": symbol, "position_size": position_size}
+            )
+
+        if len(filtered_positions) == 0:
+            return 0
+
+        return filtered_positions
+
+        #! NEED TO ADD SHORT OR LONG
 
 
 # order = HyperLiquidOrder()
