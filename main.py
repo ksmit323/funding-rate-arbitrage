@@ -1,5 +1,7 @@
+import json
 import os
 import sys
+import requests
 
 sys.path.append("src")
 sys.path.append("src/orderly")
@@ -103,24 +105,56 @@ def create_order(dex, symbol, quantity, side):
     """Helper function to create an order on any DEX."""
 
     if dex == "orderly":
-        response = client.order.create_market_order(symbol, quantity, side)
-        success = response["success"] == True
+        order_result = client.order.create_market_order(symbol, quantity, side)
+        success = order_result["success"] == True
+
+        # Workaround to get price as order_result['data']['order_price'] seems to only return None
+        url = f"https://testnet-api-evm.orderly.network/v1/public/futures/PERP_{symbol}_USDC"
+        response = json.loads(requests.request("GET", url).text)
+
         if success:
-            print("Orderly order was successful")
+            print_formatted_text(
+                f"Orderly order #{order_result['data']['order_id']} ",
+                "filled ",
+                HTML(
+                    f"<ansigreen>{order_result['data']['order_quantity']}</ansigreen>"
+                ),
+                " at ",
+                HTML(f"<ansigreen>{response['data']['mark_price']}</ansigreen>"),
+            )
         return success
 
     elif dex == "hyperliquid":
-        response = hyperliquid_order.create_market_order(symbol, quantity, side)
-        success = response == "ok"
+        order_result = hyperliquid_order.create_market_order(symbol, quantity, side)
+        success = order_result["status"] == "ok"
         if success:
-            print("Hyperliquid order was successful")
+            for status in order_result["response"]["data"]["statuses"]:
+                try:
+                    filled = status["filled"]
+                    print_formatted_text(
+                        f"Hyperliquid order #{filled['oid']} ",
+                        "filled ",
+                        HTML(f"<ansigreen>{filled['totalSz']}</ansigreen>"),
+                        " at ",
+                        HTML(f"<ansigreen>{filled['avgPx']}</ansigreen>"),
+                    )
+
+                except KeyError:
+                    print(f'Error: {status["error"]}')
+                    return order_result["status"]
         return success
 
     elif dex == "apexpro":
-        response = apexpro_order.create_market_order(symbol, quantity, side)
-        success = response["data"]["status"] == "PENDING"
+        order_result = apexpro_order.create_market_order(symbol, quantity, side)
+        success = order_result["data"]["status"] == "PENDING"
         if success:
-            print("ApexPro order was successful")
+            print_formatted_text(
+                f"ApexPro order #{order_result['data']['clientOrderId']} ",
+                "filled ",
+                HTML(f"<ansigreen>{order_result['data']['size']}</ansigreen>"),
+                " at ",
+                HTML(f"<ansigreen>{order_result['data']['price']}</ansigreen>"),
+            )
         return success
 
     # * elif ADD NEW DEX HERE
@@ -141,7 +175,7 @@ def execute_funding_rate_arbitrage(
     # Execute long order
     if not create_order(long_on_dex, symbol, order_quantity, Side.BUY):
         print(f"{long_on_dex.title()} order failed, aborting strategy")
-        print("Closing the short position!")
+        print("Close the short position!")
         # TODO: Consider adding logic to close the initial short order if needed
         return False
 
@@ -236,7 +270,7 @@ if __name__ == "__main__":
             "apexpro",
         ]
         options = [
-            "View USDC balance",  # 1
+            "View USDC balances on each DEX",  # 1
             "View open positions",  # 2
             "Close positions",  # 3
             "Cancel Open orders",  # 4
@@ -251,7 +285,9 @@ if __name__ == "__main__":
             print_available_USDC_per_DEX("Orderly balance", orderly_amount)
             hyperliquid_amount = float(hl_info.user_state(hl_address)["withdrawable"])
             print_available_USDC_per_DEX("Hyperliquid balance", hyperliquid_amount)
-            apexpro_amount = float(apexpro_order.account["data"]["wallets"][0]["balance"])
+            apexpro_amount = float(
+                apexpro_order.account["data"]["wallets"][0]["balance"]
+            )
             print_available_USDC_per_DEX("ApexPro balance", apexpro_amount)
             options = ["Back to Main Menu"]
             choice = prompt_user(options, "")
@@ -386,8 +422,8 @@ if __name__ == "__main__":
                     if execute_funding_rate_arbitrage(
                         symbol, short_on_dex, long_on_dex, order_quantity
                     ):
-                        print(
-                            "\nCongrats! You have succesfully performed the Funding Rate Arbitrage!"
+                        print_formatted_text(
+                            HTML("<ansiblue>\nCongrats!🥳 You have succesfully performed the Funding Rate Arbitrage!</ansiblue>")
                         )
 
                 elif choice == 5:
