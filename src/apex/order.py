@@ -116,17 +116,20 @@ class ApexProOrder(object):
         for position in positions:
             symbol = position["symbol"].replace("-USDC", "")
             position_size = float(position["size"])
-            filtered_positions.append(
-                {"symbol": symbol, "position_size": position_size}
-            )
+            if position_size != 0:
+                # Flip position negative for shorts
+                if position["side"] == "SHORT":
+                    position_size = position_size * -1
+                filtered_positions.append(
+                    {"symbol": symbol, "position_size": position_size}
+                )
 
         if len(filtered_positions) == 0:
             return 0
 
         return filtered_positions
 
-        #! NEED TO ADD SHORT OR LONG
-
 
 x = ApexProOrder()
-print(x.get_all_positions())
+# x.create_market_order("ETH", 0.01, Side.SELL)
+# print(x.get_all_positions())

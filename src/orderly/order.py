@@ -119,4 +119,3 @@ class Order(object):
 
         return filtered_positions
 
-        #! NEED TO ADD SHORT OR LONG

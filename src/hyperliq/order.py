@@ -86,11 +86,11 @@ class HyperLiquidOrder(object):
 
         return filtered_positions
 
-        #! NEED TO ADD SHORT OR LONG
 
 
-# order = HyperLiquidOrder()
-# order.create_market_order("ETH", 0.01, Side.BUY)
+order = HyperLiquidOrder()
+print(order.get_all_positions())
+# order.create_market_order("ETH", 0.01, Side.SELL)
 # order.market_close_one_asset("ETH")
 # order.create_limit_order("PURR/USDC", 0.01, Side.BUY, 1000)
 # order.cancel_open_orders()
