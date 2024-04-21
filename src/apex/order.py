@@ -1,23 +1,7 @@
-import os
-import sys
 import time
-from apexpro.constants import APEX_HTTP_TEST, APEX_HTTP_MAIN
-from apexpro.http_public import HttpPublic
 from enum import StrEnum
 from dotenv import load_dotenv
-from apexpro.helpers.util import round_size
-from apexpro.http_private_stark_key_sign import HttpPrivateStark
-from apexpro.constants import (
-    APEX_HTTP_TEST,
-    NETWORKID_TEST,
-)
 from apex_utils import get_apexpro_naming_convention
-
-
-# Paths required by ApexPro API
-root_path = os.path.abspath(__file__)
-root_path = "/".join(root_path.split("/")[:-2])
-sys.path.append(root_path)
 
 load_dotenv()
 
@@ -28,24 +12,13 @@ class Side(StrEnum):
 
 
 class ApexProOrder(object):
-    def __init__(self):
-        client = HttpPrivateStark(
-            APEX_HTTP_TEST,
-            network_id=NETWORKID_TEST,
-            stark_public_key=os.getenv("STARK_PUBLIC_KEY"),
-            stark_private_key=os.getenv("STARK_PRIVATE_KEY"),
-            stark_public_key_y_coordinate=os.getenv("STARK_PUBLIC_KEY_Y_COORDINATE"),
-            api_key_credentials={
-                "key": os.getenv("APEX_API_KEY"),
-                "secret": os.getenv("APEX_API_SECRET"),
-                "passphrase": os.getenv("APEX_API_PASSPHRASE"),
-            },
-        )
+    def __init__(self, client):
+        self.client = client
+
         # Function calls required by ApexPro API
         self.configs = client.configs_v2()
         client.get_user()
         self.account = client.get_account_v2()
-        self.client = client
 
     def create_order(
         self, symbol: str, side: Side, type: str, order_quantity: float, price: float
@@ -105,7 +78,6 @@ class ApexProOrder(object):
         return createOrdeRes
 
     def cancel_open_orders(self):
-        print("Cancelling ApexPro open orders")
         return self.client.delete_open_orders()
 
     def get_all_positions(self):
@@ -128,8 +100,3 @@ class ApexProOrder(object):
             return 0
 
         return filtered_positions
-
-
-x = ApexProOrder()
-# x.create_market_order("ETH", 0.01, Side.SELL)
-# print(x.get_all_positions())

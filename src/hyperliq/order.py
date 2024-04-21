@@ -10,10 +10,10 @@ class Side(StrEnum):
 
 
 class HyperLiquidOrder(object):
-    def __init__(self):
-        self.address, self.info, self.exchange = hyperliq_utils.setup(
-            constants.TESTNET_API_URL, skip_ws=True
-        )
+    def __init__(self, address, info, exchange):
+        self.address = address
+        self.info = info
+        self.exchange = exchange
 
     def create_market_order(
         self,
@@ -77,9 +77,10 @@ class HyperLiquidOrder(object):
         for position in user_state["assetPositions"]:
             symbol = position["position"]["coin"]
             position_size = float(position["position"]["szi"])
-            filtered_positions.append(
-                {"symbol": symbol, "position_size": position_size}
-            )
+            if position_size != 0:
+                filtered_positions.append(
+                    {"symbol": symbol, "position_size": position_size}
+                )
 
         if len(filtered_positions) == 0:
             return 0
@@ -87,10 +88,10 @@ class HyperLiquidOrder(object):
         return filtered_positions
 
 
-
-order = HyperLiquidOrder()
-print(order.get_all_positions())
+# order = HyperLiquidOrder()
+# print(order.get_all_positions())
 # order.create_market_order("ETH", 0.01, Side.SELL)
 # order.market_close_one_asset("ETH")
 # order.create_limit_order("PURR/USDC", 0.01, Side.BUY, 1000)
 # order.cancel_open_orders()
+# print(order.info.user_state(order.address))

@@ -70,7 +70,6 @@ class Order(object):
         side: Side,
     ): ...
 
-    # TODO: Market close an asset
     def market_close_an_asset(self, symbol):
         order_quantity = float(self.get_position(symbol)["data"]["position_qty"])
         side = Side.BUY if order_quantity < 0 else Side.SELL
@@ -110,9 +109,10 @@ class Order(object):
             # Convert Ordelry naming convention to standard convention
             symbol = position["symbol"].replace("PERP_", "").replace("_USDC", "")
             position_size = position["position_qty"]
-            filtered_positions.append(
-                {"symbol": symbol, "position_size": position_size}
-            )
+            if position_size != 0:
+                filtered_positions.append(
+                    {"symbol": symbol, "position_size": position_size}
+                )
 
         if len(filtered_positions) == 0:
             return 0

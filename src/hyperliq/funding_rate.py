@@ -4,10 +4,10 @@ import time
 
 
 class HyperliquidFundingRates(object):
-    def __init__(self):
-        self.address, self.info, self.exchange = hyperliq_utils.setup(
-            constants.TESTNET_API_URL, skip_ws=True
-        )
+    def __init__(self, address, info, exchange):
+        self.address = address
+        self.info = info
+        self.exchange = exchange
 
     def get_funding_history(self, symbol: str) -> int:
 
@@ -37,7 +37,9 @@ class HyperliquidFundingRates(object):
         # Iterating over both lists, assuming they are aligned by index
         for asset, context in zip(asset_info, asset_context):
             symbol = asset["name"]
-            funding_rate = float(context["funding"]) * 8 # convert to 8hr rate from 1hr rate
+            funding_rate = (
+                float(context["funding"]) * 8
+            )  # convert to 8hr rate from 1hr rate
             assets_to_funding_rates[symbol] = funding_rate
 
         return assets_to_funding_rates

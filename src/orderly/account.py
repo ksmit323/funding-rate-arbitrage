@@ -28,7 +28,7 @@ class Account(object):
         )
         res = self._session.send(req)
         response = json.loads(res.text)
-        print("get_client_holding:", response)
+        # print("get_client_holding:", response)
 
         return response["data"]["holding"]
 

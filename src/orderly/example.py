@@ -23,13 +23,19 @@ key = b58decode(os.getenv("ORDERLY_SECRET_TESTNET"))
 orderly_key = Ed25519PrivateKey.from_private_bytes(key)
 client.signer._key_pair = orderly_key
 
-request = Request("GET", "https://testnet-api-evm.orderly.network/v1/position/PERP_ETH_USDC")
+# url = "https://testnet-api-evm.orderly.network/v1/position/PERP_ETH_USDC"
+# url = "https://testnet-api-evm.orderly.network/v1/client/info"
+# url = "https://testnet-api-evm.orderly.network/v1/client/statistics"
+# url = "https://testnet-api-evm.orderly.network/v1/public/liquidated_positions"
 
-req = client.signer.sign_request(request)
-res = client._session.send(req)
-response = json.loads(res.text)
+
+# request = Request("GET", url)
+# req = client.signer.sign_request(request)
+# res = client._session.send(req)
+# response = json.loads(res.text)
+# print(response)
 
 # client.order.create_market_order("ETH", 0.01, Side.BUY)
 # print(client.order.market_close_an_asset("ETH"))
 
-print(client.order.get_all_positions())
+print(client.account.get_client_holding())

@@ -12,7 +12,7 @@ from hyperliquid.utils import constants
 load_dotenv()
 
 
-def setup(base_url=None, skip_ws=False):
+def hyperliquid_setup(base_url=None, skip_ws=False):
 
     # Get address
     account: LocalAccount = eth_account.Account.from_key(os.getenv("PRIVATE_KEY"))
@@ -57,3 +57,4 @@ def get_meta_data():
     response = requests.post(url, headers=headers, data=json.dumps(body))
 
     return response.json()
+

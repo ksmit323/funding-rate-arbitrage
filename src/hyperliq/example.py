@@ -7,4 +7,4 @@ load_dotenv()
 
 info = Info(constants.TESTNET_API_URL, skip_ws=True)
 user_state = info.user_state(os.getenv("WALLET_ADDRESS"))
-print(user_state)
+print(float(user_state["withdrawable"]))

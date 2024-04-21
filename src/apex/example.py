@@ -32,20 +32,28 @@
 # # tickers = ws_client.send('{"op":"subscribe","args":["instrumentInfo.all"]}')
 # # print(tickers)
 
-from apexpro.constants import APEX_WS_TEST
-from apexpro.websocket_api import WebSocket
-import time
+# from apexpro.constants import APEX_WS_TEST
+# from apexpro.websocket_api import WebSocket
+# import time
 
-# Connect with authentication!
-ws_client = WebSocket(
-    endpoint=APEX_WS_TEST,
-)
+# # Connect with authentication!
+# ws_client = WebSocket(
+#     endpoint=APEX_WS_TEST,
+# )
 
-def h1(message):
-    global received_message
-    received_message = message
+# def h1(message):
+#     global received_message
+#     received_message = message
 
-ws_client.all_ticker_stream(h1)
-time.sleep(1) # Wait for ws connection
+# ws_client.all_ticker_stream(h1)
+# time.sleep(1) # Wait for ws connection
 
-print(received_message)
+# print(received_message)
+
+from apex_utils import apexpro_setup
+
+client = apexpro_setup()
+client.configs_v2()
+client.get_user()
+account = client.get_account()
+print(account)
