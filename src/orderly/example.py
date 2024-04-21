@@ -44,7 +44,3 @@ client.signer._key_pair = orderly_key
 # url = f"https://testnet-api-evm.orderly.network/v1/public/futures/PERP_ETH_USDC"
 # response = json.loads(requests.request("GET", url).text)
 # print(response)
-
-print_formatted_text(
-    HTML("<ansiblue>\nCongrats!🥳 You have succesfully performed the Funding Rate Arbitrage!</ansiblue>")
-)

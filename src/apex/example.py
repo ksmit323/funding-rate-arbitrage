@@ -53,7 +53,7 @@
 from order import ApexProOrder
 from apex_utils import apexpro_setup
 
-# client = apexpro_setup()
-# order = ApexProOrder(client)
+client = apexpro_setup()
+order = ApexProOrder(client)
 # print(order.create_market_order("ETH", 0.01, "BUY"))
 # print(order.market_close_an_asset("ETH"))
