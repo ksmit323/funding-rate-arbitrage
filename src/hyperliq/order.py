@@ -11,6 +11,12 @@ class Side(StrEnum):
 
 class HyperLiquidOrder(object):
     def __init__(self, address, info, exchange):
+        """
+        Parameters:
+        address (str): The user's wallet address on the Hyperliquid platform.
+        info (object): An object to interact with Hyperliquid's API.
+        exchange (object): An object representing the exchange for order-related operations.
+        """
         self.address = address
         self.info = info
         self.exchange = exchange
@@ -21,6 +27,17 @@ class HyperLiquidOrder(object):
         order_quantity: float,
         side: Side,
     ):
+        """
+        Creates a market order on Hyperliquid.
+
+        Parameters:
+        symbol (str): The trading symbol for the order (e.g., "BTC-USD").
+        order_quantity (float): The quantity of the asset to be ordered.
+        side (Side): The order side, either BUY or SELL.
+
+        Returns:
+        dict: The response from the Hyperliquid platform after creating the market order.
+        """
         is_buy = True if str(side) == "BUY" else False
         order_result = self.exchange.market_open(
             symbol, is_buy, order_quantity, None, 0.01
@@ -43,6 +60,18 @@ class HyperLiquidOrder(object):
     def create_limit_order(
         self, symbol: str, order_quantity: float, side: Side, limit_price: float
     ):
+        """
+        Creates a limit order on Hyperliquid.
+
+        Parameters:
+        symbol (str): The trading symbol for the order (e.g., "BTC-USD").
+        order_quantity (float): The quantity of the asset to be ordered.
+        side (Side): The order side, either BUY or SELL.
+        limit_price (float): The limit price for the order.
+
+        Returns:
+        dict: The response from the Hyperliquid platform after creating the limit order.
+        """
 
         is_buy = True if str(side) == "BUY" else False
         order_result = self.exchange.order(
@@ -51,6 +80,12 @@ class HyperLiquidOrder(object):
         print(order_result)
 
     def market_close_an_asset(self, symbol):
+        """
+        Closes an open market position for a given asset on Hyperliquid.
+
+        Parameters:
+        symbol (str): The trading symbol of the asset to be closed (e.g., "BTC-USD").
+        """
         order_result = self.exchange.market_close(symbol)
 
         if order_result["status"] == "ok":
@@ -90,12 +125,3 @@ class HyperLiquidOrder(object):
             return 0
 
         return filtered_positions
-
-
-# order = HyperLiquidOrder()
-# print(order.get_all_positions())
-# order.create_market_order("ETH", 0.01, Side.SELL)
-# order.market_close_one_asset("ETH")
-# order.create_limit_order("PURR/USDC", 0.01, Side.BUY, 1000)
-# order.cancel_open_orders()
-# print(order.info.user_state(order.address))

@@ -24,6 +24,7 @@ class Position(object):
         self._signer = signer
         self._account = account
 
+    #TODO: Ideally will move the positions from the Order class to here
     def get_one_position(self, symbol: str):
         """Get a position for a given symbol"""
 

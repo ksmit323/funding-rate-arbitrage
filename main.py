@@ -219,9 +219,6 @@ def cancel_open_orders(dex: str):
         apexpro_order.cancel_open_orders()
 
 
-# TODO: Add positons (view, close), add orders, add PnL, add margin, add PTSL
-
-
 if __name__ == "__main__":
 
     # Set Orderly Client
