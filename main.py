@@ -206,7 +206,7 @@ def print_open_positions(dex: str):
 
 
 def print_available_USDC_per_DEX(dex: str, usdc_amount: float):
-    print(dex, ":")
+    print(dex + ":")
     print_formatted_text(HTML(f"<ansigreen>{usdc_amount} USDC</ansigreen>"))
 
 
@@ -423,7 +423,9 @@ if __name__ == "__main__":
                         symbol, short_on_dex, long_on_dex, order_quantity
                     ):
                         print_formatted_text(
-                            HTML("<ansiblue>\nCongrats!🥳 You have succesfully performed the Funding Rate Arbitrage!</ansiblue>")
+                            HTML(
+                                "<ansiblue>\nCongrats!🥳 You have succesfully performed the Funding Rate Arbitrage!</ansiblue>"
+                            )
                         )
 
                 elif choice == 5:
