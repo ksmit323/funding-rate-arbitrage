@@ -6,3 +6,4 @@ python-dotenv
 apexpro
 pandas
 numpy
+prompt_toolkit
