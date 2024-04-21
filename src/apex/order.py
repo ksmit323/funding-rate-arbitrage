@@ -47,11 +47,7 @@ class ApexProOrder(object):
         )
         price = worstPrice["data"]["worstPrice"]
 
-        createOrderRes = self.create_order(
-            apexpro_symbol, side, "MARKET", order_quantity, price
-        )
-
-        return createOrderRes
+        return self.create_order(apexpro_symbol, side, "MARKET", order_quantity, price)
 
     def create_limit_order(
         self, symbol: str, order_quantity: float, side: Side, limit_price: float

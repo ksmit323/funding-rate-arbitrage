@@ -2,6 +2,7 @@
 from base58 import b58decode
 from eth_account import Account
 from prompt_toolkit import HTML, print_formatted_text
+import requests
 from client import Client
 from config import Config
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -35,7 +36,15 @@ client.signer._key_pair = orderly_key
 # response = json.loads(res.text)
 # print(response)
 
-# client.order.create_market_order("ETH", 0.01, Side.BUY)
+# print(client.order.create_market_order("ETH", 0.01, Side.BUY))
 # print(client.order.market_close_an_asset("ETH"))
 
-print(client.account.get_client_holding())
+# print(client.account.get_client_holding())
+
+# url = f"https://testnet-api-evm.orderly.network/v1/public/futures/PERP_ETH_USDC"
+# response = json.loads(requests.request("GET", url).text)
+# print(response)
+
+print_formatted_text(
+    HTML("<ansiblue>\nCongrats!🥳 You have succesfully performed the Funding Rate Arbitrage!</ansiblue>")
+)

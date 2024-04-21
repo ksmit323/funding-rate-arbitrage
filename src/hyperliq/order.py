@@ -26,13 +26,17 @@ class HyperLiquidOrder(object):
             symbol, is_buy, order_quantity, None, 0.01
         )
 
-        if order_result["status"] == "ok":
-            for status in order_result["response"]["data"]["statuses"]:
-                try:
-                    filled = status["filled"]
-                except KeyError:
-                    print(f'Error: {status["error"]}')
-                    return order_result["status"]
+        # if order_result["status"] == "ok":
+        #     for status in order_result["response"]["data"]["statuses"]:
+        #         try:
+        #             filled = status["filled"]
+        #             print(
+        #                 f'Hyperliquid Order #{filled["oid"]} filled {filled["totalSz"]} @{filled["avgPx"]}'
+        #             )
+        #         except KeyError:
+        #             print(f'Error: {status["error"]}')
+        #             return order_result["status"]
+        return order_result
 
         return order_result["status"]
 
