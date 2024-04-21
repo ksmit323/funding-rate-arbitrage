@@ -44,26 +44,6 @@ def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
 
 
-def orderly_get_holdings():
-    print(client.account.get_client_holding())
-
-
-def orderly_get_orders():
-    print(client.order.get_orders())
-
-
-def orderly_cancel_all_orders():
-    res = client.order.cancel_all_orders()
-    print("Cancelled Orders: ", res)
-    return res
-
-
-def orderly_settle_pnl():
-    res = client.pnl.settle_pnl()
-    print("settle_pnl:", res)
-    return res
-
-
 def get_dex_from_dex_options(choice: int):
     try:
         return dex_options[choice - 1]
