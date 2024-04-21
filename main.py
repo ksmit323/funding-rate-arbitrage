@@ -5,13 +5,16 @@ sys.path.append("src")
 sys.path.append("src/orderly")
 sys.path.append("src/hyperliq")
 sys.path.append("src/apex")
+
 import time
 from eth_account import Account
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from base58 import b58decode
 from dotenv import load_dotenv
+from hyperliq.hyperliq_utils import hyperliquid_setup
 from hyperliq.funding_rate import HyperliquidFundingRates
 from hyperliq.order import HyperLiquidOrder
+from hyperliquid.utils import constants
 from orderly.funding_rate import OrderlyFundingRates
 from orderly.client import Client
 from orderly.config import Config
@@ -19,6 +22,7 @@ from orderly.order import OrderType, Side
 from orderly.util import print_ascii_art
 from apex.funding_rate import ApexProFundingRates
 from apex.order import ApexProOrder
+from src.apex.apex_utils import apexpro_setup
 from strategies.funding_rate_arbitrage import FundingRateArbitrage
 from prompt_toolkit import print_formatted_text, HTML
 
@@ -58,6 +62,13 @@ def orderly_settle_pnl():
     res = client.pnl.settle_pnl()
     print("settle_pnl:", res)
     return res
+
+
+def get_dex_from_dex_options(choice: int):
+    try:
+        return dex_options[choice - 1]
+    except IndexError:
+        print("Invalid choice, aborting!")
 
 
 def analyze_funding_rate_arbitrage(option: int):
@@ -157,24 +168,47 @@ def execute_funding_rate_arbitrage(
     return True
 
 
+def print_open_positions(dex: str):
+    # * ADD NEW DEX HERE
+    if dex == "orderly":
+        print("Orderly Positions: ")
+        positions = client.order.get_all_positions()
+    elif dex == "hyperliquid":
+        print("Hyperliquid Positions: ")
+        positions = hyperliquid_order.get_all_positions()
+    elif dex == "apexpro":
+        print("ApexPro Positions: ")
+        positions = apexpro_order.get_all_positions()
+
+    for position in positions:
+        symbol = position["symbol"]
+        size = position["position_size"]
+        if size > 0:
+            print_formatted_text(
+                f"     {symbol}: ", HTML(f"<ansigreen>{size}</ansigreen>")
+            )
+        else:
+            print_formatted_text(f"     {symbol}: ", HTML(f"<ansired>{size}</ansired>"))
+
+
+def print_available_USDC_per_DEX(dex: str, usdc_amount: float):
+    print(dex, ":")
+    print_formatted_text(HTML(f"<ansigreen>{usdc_amount} USDC</ansigreen>"))
+
+
+def cancel_open_orders(dex: str):
+    if dex == "orderly":
+        client.order.cancel_all_orders()
+    elif dex == "hyperliquid":
+        hyperliquid_order.cancel_open_orders()
+    elif dex == "apexpro":
+        apexpro_order.cancel_open_orders()
+
+
 # TODO: Add positons (view, close), add orders, add PnL, add margin, add PTSL
 
 
 if __name__ == "__main__":
-
-    # *** ADD NEW DEX HERE ***:
-    DEX_rates_list = [
-        ("orderly", OrderlyFundingRates().get_orderly_funding_rates()),
-        ("hyperliquid", HyperliquidFundingRates().get_hyperliquid_funding_rates()),
-        ("apexpro", ApexProFundingRates().get_apexpro_funding_rates()),
-    ]
-
-    # *** ADD NEW DEX HERE ***:
-    dex_options = [
-        "orderly",
-        "hyperliquid",
-        "apexpro",
-    ]
 
     # Set Orderly Client
     account: Account = Account.from_key(os.getenv("PRIVATE_KEY"))
@@ -186,38 +220,80 @@ if __name__ == "__main__":
     orderly_key = Ed25519PrivateKey.from_private_bytes(key)
     client.signer._key_pair = orderly_key
 
+    # Set up Hyperliquid client
+    hl_address, hl_info, hl_exchange = hyperliquid_setup(
+        constants.TESTNET_API_URL, skip_ws=True
+    )
+
+    # Set up ApexPro client
+    apexpro_client = apexpro_setup()
+
     # Initiate DEX Order object
-    hyperliquid_order = HyperLiquidOrder()
-    apexpro_order = ApexProOrder()
+    hyperliquid_order = HyperLiquidOrder(hl_address, hl_info, hl_exchange)
+    apexpro_order = ApexProOrder(apexpro_client)
     # *** ADD NEW DEX HERE ***
+
+    DEX_rates_list = [
+        ("orderly", OrderlyFundingRates().get_orderly_funding_rates()),
+        (
+            "hyperliquid",
+            HyperliquidFundingRates(
+                hl_address, hl_info, hl_exchange
+            ).get_hyperliquid_funding_rates(),
+        ),
+        ("apexpro", ApexProFundingRates().get_apexpro_funding_rates()),
+        # *** ADD NEW DEX HERE ***:
+    ]
 
     while True:
         clear_screen()
         print_ascii_art()
+
+        # *** ADD NEW DEX HERE ***:
+        dex_options = [
+            "orderly",
+            "hyperliquid",
+            "apexpro",
+        ]
         options = [
-            "View open positions",  # 1
-            "Close positions",  # 2
-            "Cancel Open orders",  # 3
-            "View PnL",  # 4
+            "View USDC balance",  # 1
+            "View open positions",  # 2
+            "Close positions",  # 3
+            "Cancel Open orders",  # 4
             "Start Funding Rate Strategy",  # 5
             "Exit",  # 6
         ]
         choice = prompt_user(options, "\nWhat would you like to do?")
 
         if choice == 1:
-            ...
+            print("\n")
+            orderly_amount = float(client.account.get_client_holding()[0]["holding"])
+            print_available_USDC_per_DEX("Orderly balance", orderly_amount)
+            hyperliquid_amount = float(hl_info.user_state(hl_address)["withdrawable"])
+            print_available_USDC_per_DEX("Hyperliquid balance", hyperliquid_amount)
+            apexpro_amount = float(apexpro_order.account["data"]["wallets"][0]["balance"])
+            print_available_USDC_per_DEX("ApexPro balance", apexpro_amount)
             options = ["Back to Main Menu"]
+            choice = prompt_user(options, "")
+            if choice:
+                continue
 
-        elif choice == 2:
+        if choice == 2:
+            print("\n")
+            for dex in dex_options:
+                print_open_positions(dex)
+            options = ["Back to Main Menu"]
+            choice = prompt_user(options, "")
+            if choice:
+                continue
+
+        elif choice == 3:
 
             # Prompt user for DEX
             choice = prompt_user(
                 dex_options, "\nWhat DEX would you like to close positions on?"
             )
-            try:
-                close_on_dex = dex_options[choice - 1]
-            except IndexError:
-                print("Invalid choice, aborting!")
+            close_on_dex = get_dex_from_dex_options(choice)
 
             # Prompt user for symbol
             print("\nWhen entering a symbol, just enter the symbol itself i.e. ETH\n")
@@ -243,13 +319,26 @@ if __name__ == "__main__":
                 print("Order has failed!")
                 time.sleep(2)
 
-        elif choice == 3:
-            ...
-            options = ["Back to Main Menu"]
-
         elif choice == 4:
-            ...
-            options = ["Back to Main Menu"]
+            dex_options.append("Back to Main Menu")
+
+            while True:
+                choice = prompt_user(
+                    dex_options, "\nWhat DEX would you like to close open orders on?"
+                )
+                # User chose back to main menu
+                if choice == len(dex_options):
+                    break
+
+                # Cancel orders on selected DEX
+                dex = get_dex_from_dex_options(choice)
+                cancel_open_orders(dex)
+                print_formatted_text(
+                    "Open positions have been closed on",
+                    HTML(f"<ansigreen>{dex}</ansigreen>"),
+                )
+                # Remove DEX from list of choices
+                del dex_options[choice - 1]
 
         elif choice == 5:
             while True:
@@ -280,20 +369,14 @@ if __name__ == "__main__":
 
                     # Prompt user to pick DEX to short on
                     choice = prompt_user(dex_options, "\nShort on what DEX?")
-                    try:
-                        short_on_dex = dex_options[choice - 1]
-                    except IndexError:
-                        print("Invalid choice, aborting!")
+                    short_on_dex = get_dex_from_dex_options(choice)
 
                     # Remove DEX from list of choices
                     del dex_options[choice - 1]
 
                     # Prompt user to pick DEX to long on
                     choice = prompt_user(dex_options, "\nLong on what DEX?")
-                    try:
-                        long_on_dex = dex_options[choice - 1]
-                    except IndexError:
-                        print("Invalid choice, aborting!")
+                    long_on_dex = get_dex_from_dex_options(choice)
 
                     # Prompt user for order quantity
                     order_quantity = float(input("\nEnter Order Quantity: "))
