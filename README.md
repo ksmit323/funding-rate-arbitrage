@@ -132,4 +132,4 @@ If you have any suggestions or ideas for improvements, feel free to open an issu
 
 ## Acknowledgements
 
-I would like to thank the organizers of the Encode Scaling Web3 Hackathon for providing this opportunity to explore the fascinating world of decentralized finance and perpetual futures markets.
+I would like to thank the organizers of the Encode Scaling Web3 Hackathon for providing this opportunity to explore the fascinating world of perpetual futures markets.
