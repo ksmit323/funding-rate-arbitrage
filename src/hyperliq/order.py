@@ -85,6 +85,8 @@ class HyperLiquidOrder(object):
 
         Parameters:
         symbol (str): The trading symbol of the asset to be closed (e.g., "BTC-USD").
+
+        Returns: Bool if order is successful
         """
         order_result = self.exchange.market_close(symbol)
 
@@ -95,8 +97,10 @@ class HyperLiquidOrder(object):
                     print(
                         f'Hyperliquid Order #{filled["oid"]} filled {filled["totalSz"]} @{filled["avgPx"]}'
                     )
+                    return True
                 except KeyError:
                     print(f'Error: {status["error"]}')
+                    return False
 
     def cancel_open_orders(self):
         open_orders = self.info.open_orders(self.address)
@@ -122,6 +126,6 @@ class HyperLiquidOrder(object):
                 )
 
         if len(filtered_positions) == 0:
-            return 0
+            print("     No open positions")
 
         return filtered_positions

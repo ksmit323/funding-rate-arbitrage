@@ -155,6 +155,6 @@ class ApexProOrder(object):
                 )
 
         if len(filtered_positions) == 0:
-            return 0
+            print("     No open positions")
 
         return filtered_positions

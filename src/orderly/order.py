@@ -74,7 +74,7 @@ class Order(object):
         order_quantity = float(self.get_position(symbol)["data"]["position_qty"])
         side = Side.BUY if order_quantity < 0 else Side.SELL
         if order_quantity != 0:
-            return self.create_market_order(symbol, order_quantity, side)
+            return self.create_market_order(symbol, abs(order_quantity), side)
         else:
             print("No position held in this symbol")
 
@@ -115,7 +115,7 @@ class Order(object):
                 )
 
         if len(filtered_positions) == 0:
-            return 0
+            print("     No open positions")
 
         return filtered_positions
 
