@@ -80,22 +80,17 @@ def market_close_an_asset(dex, symbol):
     if dex == "orderly":
         response = client.order.market_close_an_asset(symbol)
         success = response["success"] == True
-        if success:
-            print("Orderly order was successful")
+        if not success:
+            print(response["message"])
         return success
 
     elif dex == "hyperliquid":
-        response = hyperliquid_order.market_close_an_asset(symbol)
-        success = response == "ok"
-        if success:
-            print("Hyperliquid order was successful")
+        success = hyperliquid_order.market_close_an_asset(symbol)
         return success
 
     elif dex == "apexpro":
         response = apexpro_order.market_close_an_asset(symbol)
         success = response["data"]["status"] == "PENDING"
-        if success:
-            print("ApexPro order was successful")
         return success
 
     # * elif ADD NEW DEX HERE
@@ -221,6 +216,9 @@ def cancel_open_orders(dex: str):
 
 if __name__ == "__main__":
 
+    address = os.getenv("WALLET_ADDRESS")
+    print("Running with account address:", address)
+
     # Set Orderly Client
     account: Account = Account.from_key(os.getenv("PRIVATE_KEY"))
     config = Config()
@@ -230,19 +228,19 @@ if __name__ == "__main__":
     key = b58decode(os.getenv("ORDERLY_SECRET_TESTNET"))
     orderly_key = Ed25519PrivateKey.from_private_bytes(key)
     client.signer._key_pair = orderly_key
+    print("Connected to Orderly")
 
     # Set up Hyperliquid client
     hl_address, hl_info, hl_exchange = hyperliquid_setup(
         constants.TESTNET_API_URL, skip_ws=True
     )
+    hyperliquid_order = HyperLiquidOrder(hl_address, hl_info, hl_exchange)
+    print("Connected to Hyperliquid")
 
     # Set up ApexPro client
     apexpro_client = apexpro_setup()
-
-    # Initiate DEX Order object
-    hyperliquid_order = HyperLiquidOrder(hl_address, hl_info, hl_exchange)
     apexpro_order = ApexProOrder(apexpro_client)
-    # *** ADD NEW DEX HERE ***
+    print("Connected to ApexPro")
 
     DEX_rates_list = [
         ("orderly", OrderlyFundingRates().get_orderly_funding_rates()),
@@ -270,28 +268,34 @@ if __name__ == "__main__":
             "View USDC balances on each DEX",  # 1
             "View open positions",  # 2
             "Close positions",  # 3
+            #TODO: Add option to create individual orders
             "Cancel Open orders",  # 4
             "Start Funding Rate Strategy",  # 5
             "Exit",  # 6
         ]
         choice = prompt_user(options, "\nWhat would you like to do?")
 
+        # View USDC balances on each DEX
         if choice == 1:
             print("\n")
             orderly_amount = float(client.account.get_client_holding()[0]["holding"])
             print_available_USDC_per_DEX("Orderly balance", orderly_amount)
+
             hyperliquid_amount = float(hl_info.user_state(hl_address)["withdrawable"])
             print_available_USDC_per_DEX("Hyperliquid balance", hyperliquid_amount)
+
             apexpro_amount = float(
                 apexpro_order.account["data"]["wallets"][0]["balance"]
             )
             print_available_USDC_per_DEX("ApexPro balance", apexpro_amount)
+
             options = ["Back to Main Menu"]
             choice = prompt_user(options, "")
             if choice:
                 continue
 
-        if choice == 2:
+        # View open positions
+        elif choice == 2:
             print("\n")
             for dex in dex_options:
                 print_open_positions(dex)
@@ -300,6 +304,7 @@ if __name__ == "__main__":
             if choice:
                 continue
 
+        # Close positions
         elif choice == 3:
 
             # Prompt user for DEX
@@ -330,8 +335,9 @@ if __name__ == "__main__":
 
             else:
                 print("Order has failed!")
-                time.sleep(2)
+                break
 
+        # Cancel open orders
         elif choice == 4:
             dex_options.append("Back to Main Menu")
 
@@ -353,6 +359,7 @@ if __name__ == "__main__":
                 # Remove DEX from list of choices
                 del dex_options[choice - 1]
 
+        # Start funding rate arbitrage
         elif choice == 5:
             while True:
                 options = [
@@ -363,17 +370,24 @@ if __name__ == "__main__":
                     "Back to Main Menu",
                 ]
                 choice = prompt_user(options, "\nWhat would you like to do?")
+
+                # View rates on all DEXs
                 if choice == 1:
                     clear_screen()
                     analyze_funding_rate_arbitrage(1)
+                
+                # View top 3 rates differences from Orderly
                 elif choice == 2:
                     clear_screen()
                     analyze_funding_rate_arbitrage(2)
+                
+                # VIew top 3 rate differences from all DEXs
                 elif choice == 3:
                     clear_screen()
                     analyze_funding_rate_arbitrage(3)
-                elif choice == 4:
 
+                # Execute strategy
+                elif choice == 4:
                     # Prompt user for symbol
                     print(
                         "\nWhen entering a symbol, just enter the symbol itself i.e. ETH\n"
@@ -431,6 +445,7 @@ if __name__ == "__main__":
                     print("\nInvalid choice, please try again!")
                     time.sleep(1.5)
 
+        # Exit
         elif choice == 6:
             print("\nExiting program, have a good day 😊\n")
             break
