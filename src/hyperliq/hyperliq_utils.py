@@ -17,7 +17,6 @@ def hyperliquid_setup(base_url=None, skip_ws=False):
     # Get address
     account: LocalAccount = eth_account.Account.from_key(os.getenv("PRIVATE_KEY"))
     address = os.getenv("WALLET_ADDRESS")
-    print("Running with account address:", address)
 
     # Get info
     info = Info(base_url, skip_ws)

@@ -37,7 +37,7 @@ client.signer._key_pair = orderly_key
 # print(response)
 
 # print(client.order.create_market_order("ETH", 0.01, Side.BUY))
-# print(client.order.market_close_an_asset("ETH"))
+print(client.order.market_close_an_asset("TIA"))
 
 # print(client.account.get_client_holding())
 
