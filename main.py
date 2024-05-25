@@ -68,8 +68,6 @@ def analyze_funding_rate_arbitrage(option: int):
 
     if option == 1:
         fr_arbitrage.display_rates_table(df)
-    elif option == 2:
-        fr_arbitrage.display_top_rates_differences_from_Orderly(df)
     else:
         fr_arbitrage.display_top_rates_differences_from_all_DEXs(df)
 
@@ -363,11 +361,10 @@ if __name__ == "__main__":
         elif choice == 5:
             while True:
                 options = [
-                    "View rates on all available DEXs",
-                    "View top 3 rate differences from Orderly",
-                    "View top 3 rate differences from all DEXs",
-                    "Execute Strategy",
-                    "Back to Main Menu",
+                    "View rates on all available DEXs", #1
+                    "View top 3 rate differences from all DEXs", #2
+                    "Execute Strategy", #3
+                    "Back to Main Menu", #4
                 ]
                 choice = prompt_user(options, "\nWhat would you like to do?")
 
@@ -376,15 +373,10 @@ if __name__ == "__main__":
                     clear_screen()
                     analyze_funding_rate_arbitrage(1)
                 
-                # View top 3 rates differences from Orderly
+                # VIew top rate differences from all DEXs
                 elif choice == 2:
                     clear_screen()
                     analyze_funding_rate_arbitrage(2)
-                
-                # VIew top 3 rate differences from all DEXs
-                elif choice == 3:
-                    clear_screen()
-                    analyze_funding_rate_arbitrage(3)
 
                 # Execute strategy
                 elif choice == 4:

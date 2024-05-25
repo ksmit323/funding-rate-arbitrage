@@ -72,39 +72,6 @@ class FundingRateArbitrage(object):
         print("\nHere are the funding rates for all assets on each DEX:")
         print(tabulate(df, headers="keys", tablefmt="psql"))
 
-    def display_top_rates_differences_from_Orderly(self, df):
-        """
-        Identifies and displays the top three assets with the largest funding rate differences
-        compared to Orderly.
-
-        Parameters:
-        df (pd.DataFrame): A DataFrame containing compiled funding rates for each asset on various DEXs.
-        """
-
-        # Function to calculate the maximum difference from Orderly and identify the DEX
-        def max_diff_and_dex(row):
-            orderly_rate = row["orderly"]
-            max_diff = 0
-            max_dex = None
-            for dex, rate in row.items():
-                if dex != "orderly":
-                    diff = abs(orderly_rate - rate)
-                    if diff > max_diff:
-                        max_diff = diff
-                        max_dex = dex
-            return pd.Series([max_diff, max_dex], index=["MaxDiff", "MaxDEX"])
-
-        # Apply the function to each row and create new columns for the difference and the corresponding DEX
-        df[["Max Orderly Diff", "DEX with Max Diff"]] = df.apply(
-            max_diff_and_dex, axis=1
-        )
-
-        # Get the top three rows with the largest differences
-        top_three_diff = df.nlargest(3, "Max Orderly Diff")
-
-        # print("\nTop three rows with the largest differences:")
-        print(tabulate(top_three_diff, headers="keys", tablefmt="psql"))
-
     def display_top_rates_differences_from_all_DEXs(self, df):
         """
         Identifies and displays the top three assets with the largest funding rate differences
