@@ -232,7 +232,7 @@ if __name__ == "__main__":
 
     # Set up Hyperliquid client
     hl_address, hl_info, hl_exchange = hyperliquid_setup(
-        constants.TESTNET_API_URL, skip_ws=True
+        constants.MAINNET_API_URL, skip_ws=True
     )
     hyperliquid_order = HyperLiquidOrder(hl_address, hl_info, hl_exchange)
     print("Connected to Hyperliquid")
