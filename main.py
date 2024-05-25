@@ -104,7 +104,7 @@ def create_order(dex, symbol, quantity, side):
         success = order_result["success"] == True
 
         # Workaround to get price as order_result['data']['order_price'] seems to only return None
-        url = f"https://testnet-api-evm.orderly.network/v1/public/futures/PERP_{symbol}_USDC"
+        url = f"https://api-evm.orderly.network/v1/public/futures/PERP_{symbol}_USDC"                #! May need to correct this URL
         response = json.loads(requests.request("GET", url).text)
 
         if success:

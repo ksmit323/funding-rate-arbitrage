@@ -8,9 +8,6 @@ import pandas as pd
 import numpy as np
 from tabulate import tabulate
 
-from funding_rate import OrderlyFundingRates
-from hyperliq.funding_rate import HyperliquidFundingRates
-
 
 class FundingRateArbitrage(object):
     def __init__(self):

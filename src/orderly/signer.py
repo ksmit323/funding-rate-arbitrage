@@ -45,7 +45,7 @@ class Signer(object):
             "orderly-timestamp": str(timestamp),
             "orderly-account-id": self._account_id,
             "orderly-key": os.getenv(
-                "ORDERLY_KEY_TESTNET"
+                "ORDERLY_KEY_MAINNET"
             ),  # Changed this line to hard code the key.  The function that was there before doesn't exist.
             "orderly-signature": orderly_signature,
         }

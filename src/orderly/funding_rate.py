@@ -3,7 +3,7 @@ import requests
 
 class OrderlyFundingRates(object):
     def __init__(self):
-        self.url = "https://testnet-api-evm.orderly.network/v1/public"
+        self.url = "https://api-evm.orderly.network/v1/public"
 
     def _get_data(self, url):
         """
