@@ -118,8 +118,8 @@ class FundingRateArbitrage(object):
         df["MinRate"] = df.min(axis=1, skipna=True)
         df["Difference"] = (df["MaxRate"] - df["MinRate"]).abs()
 
-        # Get the top three rows with the largest differences
-        top_three_diff = df.nlargest(3, "Difference")
+        # Get the top six rows with the largest differences
+        top_diff = df.nlargest(6, "Difference")
 
         # print("\nTop three rows with the largest differences:")
-        print(tabulate(top_three_diff, headers="keys", tablefmt="psql"))
+        print(tabulate(top_diff, headers="keys", tablefmt="psql"))
