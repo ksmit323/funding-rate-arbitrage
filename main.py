@@ -225,7 +225,7 @@ if __name__ == "__main__":
     client = Client(config, account)
 
     # Set signer's Orderly key
-    key = b58decode(os.getenv("ORDERLY_SECRET_TESTNET"))
+    key = b58decode(os.getenv("ORDERLY_SECRET_MAINNET"))
     orderly_key = Ed25519PrivateKey.from_private_bytes(key)
     client.signer._key_pair = orderly_key
     print("Connected to Orderly")
