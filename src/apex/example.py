@@ -12,6 +12,7 @@
 # from apexpro.constants import APEX_WS_TEST
 # from apexpro.websocket_api import WebSocket
 
+# # print("Hello, Apexpro")
 
 # client = HttpPublic(APEX_HTTP_TEST)
 # # print(client.depth(symbol="BTC-USDC"))
@@ -51,14 +52,8 @@
 
 from order import ApexProOrder
 from apex_utils import apexpro_setup
-from apex.funding_rate import ApexProFundingRates
 
 client = apexpro_setup()
-
-fr = ApexProFundingRates().get_apexpro_funding_rates()
-
-print(fr)
-
-# order = ApexProOrder(client)
+order = ApexProOrder(client)
 # print(order.create_market_order("ETH", 0.01, "BUY"))
 # print(order.market_close_an_asset("ETH"))

@@ -1,4 +1,4 @@
-from apexpro.constants import APEX_WS_MAIN
+from apexpro.constants import APEX_WS_TEST
 from apexpro.websocket_api import WebSocket
 import time
 
@@ -6,7 +6,7 @@ import time
 class ApexProFundingRates(object):
     def __init__(self):
         self.ws_client = WebSocket(
-            endpoint=APEX_WS_MAIN,
+            endpoint=APEX_WS_TEST,
         )
 
     def get_all_ticker_info(self):

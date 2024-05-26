@@ -68,6 +68,8 @@ def analyze_funding_rate_arbitrage(option: int):
 
     if option == 1:
         fr_arbitrage.display_rates_table(df)
+    elif option == 2:
+        fr_arbitrage.display_top_rates_differences_from_Orderly(df)
     else:
         fr_arbitrage.display_top_rates_differences_from_all_DEXs(df)
 
@@ -102,7 +104,7 @@ def create_order(dex, symbol, quantity, side):
         success = order_result["success"] == True
 
         # Workaround to get price as order_result['data']['order_price'] seems to only return None
-        url = f"https://api-evm.orderly.network/v1/public/futures/PERP_{symbol}_USDC"                #! May need to correct this URL
+        url = f"https://testnet-api-evm.orderly.network/v1/public/futures/PERP_{symbol}_USDC"
         response = json.loads(requests.request("GET", url).text)
 
         if success:
@@ -223,14 +225,14 @@ if __name__ == "__main__":
     client = Client(config, account)
 
     # Set signer's Orderly key
-    key = b58decode(os.getenv("ORDERLY_SECRET_MAINNET"))
+    key = b58decode(os.getenv("ORDERLY_SECRET_TESTNET"))
     orderly_key = Ed25519PrivateKey.from_private_bytes(key)
     client.signer._key_pair = orderly_key
     print("Connected to Orderly")
 
     # Set up Hyperliquid client
     hl_address, hl_info, hl_exchange = hyperliquid_setup(
-        constants.MAINNET_API_URL, skip_ws=True
+        constants.TESTNET_API_URL, skip_ws=True
     )
     hyperliquid_order = HyperLiquidOrder(hl_address, hl_info, hl_exchange)
     print("Connected to Hyperliquid")
@@ -361,10 +363,11 @@ if __name__ == "__main__":
         elif choice == 5:
             while True:
                 options = [
-                    "View rates on all available DEXs", #1
-                    "View top 3 rate differences from all DEXs", #2
-                    "Execute Strategy", #3
-                    "Back to Main Menu", #4
+                    "View rates on all available DEXs",
+                    "View top 3 rate differences from Orderly",
+                    "View top 3 rate differences from all DEXs",
+                    "Execute Strategy",
+                    "Back to Main Menu",
                 ]
                 choice = prompt_user(options, "\nWhat would you like to do?")
 
@@ -373,10 +376,15 @@ if __name__ == "__main__":
                     clear_screen()
                     analyze_funding_rate_arbitrage(1)
                 
-                # VIew top rate differences from all DEXs
+                # View top 3 rates differences from Orderly
                 elif choice == 2:
                     clear_screen()
                     analyze_funding_rate_arbitrage(2)
+                
+                # VIew top 3 rate differences from all DEXs
+                elif choice == 3:
+                    clear_screen()
+                    analyze_funding_rate_arbitrage(3)
 
                 # Execute strategy
                 elif choice == 4:

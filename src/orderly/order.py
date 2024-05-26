@@ -89,7 +89,7 @@ class Order(object):
     def get_position(self, symbol):
         symbol = get_orderly_naming_convention(symbol)
         request = Request(
-            "GET", f"https://api-evm.orderly.network/v1/position/{symbol}"
+            "GET", f"https://testnet-api-evm.orderly.network/v1/position/{symbol}"
         )
         return self._send_request(request)
 
@@ -100,7 +100,7 @@ class Order(object):
         returns: a list of dicts with symbols and position size
         """
 
-        request = Request("GET", "https://api-evm.orderly.network/v1/positions")
+        request = Request("GET", "https://testnet-api-evm.orderly.network/v1/positions")
         positions_data = self._send_request(request)
 
         filtered_positions = []
